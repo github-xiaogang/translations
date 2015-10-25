@@ -1,10 +1,10 @@
 # iOS Xcode部署配置
 
-几乎所有移动应用，包括我正在编写的一款iOS应用 [Emmerge][1] 都需要与服务器交互。从第一次向团队成员演示应用开始，我们就开始找一种更快构建不同环境产品的方法。一开始我们只需要修改不同环境下的服务器地址，但在经过几天来回的在配置文件中切换本地和远程服务器地址后，我对这种重复工作烦透了，于是到Google查找解决方法。搜索一段时间后，我却没用找到如何在Xcode中为每一种构建环境分别设置配置的方法，于是在大量搜索stack overflow和博客后，我总结了一种相当简洁有效的方法，这里分享给需要的人。
+几乎所有移动应用，包括我正在编写的一款iOS应用 [Emmerge][1] 都需要与服务器交互。从第一次向团队成员演示应用开始，我们就开始找一种更快构建不同环境产品的方法。一开始我们只需要修改不同环境下的服务器地址，但在经过几天来回的在配置文件中切换本地和远程服务器地址后，我对这种重复工作烦透了，于是到Google查找解决方法。在搜索一段时间后，我却没用找到如何在Xcode中为每一种构建环境分别设置配置的方法，于是在经过大量搜索stack overflow和博客后，我总结了一种相当简洁有效的方法，在这里分享给需要的人。
 
 ## 我们什么时候需要不同的部署环境
 
-首先，几乎所有需要服务器的应用至少需要配置服务器地址；又比如你的应用使用了第三方平台登录，如Facbook，Google等，并且在每种构建环境下又需要不同的第三方平台，那么就需要为不同构建环境设置不同的平台App IDs；又或许你的应用需要收集分析数据，那么你可能就需要配置不同的 [mixpanel][2] ID。
+首先，几乎所有需要服务器的应用至少需要配置服务器地址；又或者你的应用使用了第三方平台登录如Facbook，Google等，并且在每种构建环境下又需要不同的第三方平台，那么就需要为不同构建环境设置不同的平台App IDs；又或者你的应用需要收集分析数据，那么你可能就需要配置不同的 [mixpanel][2] ID。
 
 ## 具体设置方法
 
@@ -24,7 +24,7 @@
 
 然后重复上面操作，复制"Debug"配置，重命名为"Development"。
 
-下面删除默认的Debug和Release配置。
+接着，删除默认的Debug和Release配置。
 
 ![创建Development配置][6]
 
@@ -36,7 +36,7 @@
 
 ![创建Production配置文件][8]
 
-3.现在你可以向配置文件中添加任意的配置项，但要确保两个配置文件中的配置项目的key相同。
+3.现在你可以向配置文件中添加任意的配置项，但要确保两个配置文件中的配置项的key相同。
 
 ![添加配置内容][9]
 
@@ -48,7 +48,7 @@
 
 ![移除引用][11]
 
-5.添加一个Run Script Build Phase ：选择Editor -> Add Build Phase -> Add Run Script Build Phase。
+5.添加一个Run Script Build Phase，选择Editor -> Add Build Phase -> Add Run Script Build Phase。
 
 ![添加Run Script][12]
 
@@ -66,7 +66,7 @@ cp -r “${PROJECT_DIR}/Settings-Production.plist” “${BUILT_PRODUCTS_DIR}/${
 fi
 ```
 
-7.下面我们就可以在代码中读取配置文件中的内容：
+7.下面我们就可以在程序运行时读取配置文件中的内容：
 
 ```
 var serverUrl: String = ""
@@ -78,20 +78,20 @@ if let filePath = NSBundle.mainBundle().pathForResource("Settings", ofType: "pli
 }
 ```
 
-8.接下来设置运行时的配置环境，点击菜单栏中的Product -> Scheme -> Edit Scheme，选中左侧Action列表栏中的"Run"，然后在右侧选择Development或Production配置
+8.接下来设置应用构建时的配置环境，点击菜单栏中的Product -> Scheme -> Edit Scheme，选中左侧Action列表栏中的"Run"，然后在右侧选择Development或Production配置
 
 ![选择配置1][13]
 
 ![选择配置2][14]
 
-9.同样，你需要为其他的Action如Test，Profile，Analyze和Archive选择构建配置。也就是说，如果你将要构建最终产品包时，你需要在打包并上传到TestFlight之前将"Archive" Action的构建环境设置为Production!
+9.同样，你需要为其他的Action，如Test，Profile，Analyze和Archive选择构建配置。比如，在你打算构建上线产品包时，你需要在打包并上传到TestFlight前将"Archive" Action的构建配置设为Production!
 
 CocoaPods注意事项：
 
 如果你在创建Devlopment和Production配置之前，你已经使用CocoaPods创建了项目，可能会碰到错误比如，`[!] CocoaPods did not set the base configuration of your project because your project already has a custom config set. In order for CocoaPods integration to work at all, please either set the base configurations of the target … in your build configuration.
 ` 或者在链接期间会遇到其他pods相关错误。
 
-解决这些问题，你需要到Project setting区域的info栏（和步骤1相同位置）,将所有新增配置的"Based on Configuration File" 设置为 "None"，然后运行"pod install"强制pod工具为新创建的配置重新生成配置文件。同样如果后面你又添加了新的配置，你需要重复上面的操作。
+解决这些问题，你需要到Project setting区域的info栏（和步骤1相同位置）,将所有新增配置的"Based on Configuration File" 设置为 "None"，然后运行"pod install"强制pod工具为新创建的配置重新生成配置文件。同样如果后面你又添加了新的配置，你需要重复上面操作。
 
 ![cocoapods][15]
 
